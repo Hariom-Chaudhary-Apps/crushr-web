@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Opening Crushr...</title>
+</head>
+<body>
+<script>
+  const hash = window.location.hash;
+  if (hash) {
+    window.location.href = 'com.datingapp.crushr://login-callback' + hash;
+  } else {
+    document.body.innerHTML = '<p>Invalid or expired link. Please request a new one in the Crushr app.</p>';
+  }
+</script>
+<p>Opening Crushr app...</p>
+</body>
+</html>
