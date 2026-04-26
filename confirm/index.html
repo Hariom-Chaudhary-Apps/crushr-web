@@ -1,41 +1,175 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
   <title>Email Confirmed — Crushr</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --pink: #E84393;
+      --pink-dark: #c2306e;
+      --black: #0f0f0f;
+      --gray: #6b7280;
+      --border: #e5e7eb;
+      --success: #16a34a;
+      --radius: clamp(12px, 3vw, 16px);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body { height: 100%; width: 100%; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: #f4f4f8;
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: clamp(16px, 5vw, 40px);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(ellipse 100% 50% at 50% 0%, #dcfce7 0%, transparent 65%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .card {
+      position: relative;
+      z-index: 1;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: clamp(16px, 4vw, 28px);
+      padding: clamp(28px, 6vw, 52px) clamp(20px, 6vw, 44px);
+      width: 100%;
+      max-width: 440px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(22,163,74,0.06), 0 8px 40px rgba(0,0,0,0.07);
+      animation: fadeUp 0.45s cubic-bezier(0.22,1,0.36,1) both;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .brand-name {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(30px, 8vw, 40px);
+      color: var(--pink);
+      letter-spacing: -0.5px;
+      line-height: 1;
+      margin-bottom: 5px;
+    }
+
+    .brand-tagline {
+      font-size: clamp(9px, 2.5vw, 11px);
+      color: #bbb;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      font-weight: 500;
+    }
+
+    .brand-line {
+      width: 36px;
+      height: 2px;
+      background: var(--pink);
+      margin: clamp(14px, 3vw, 20px) auto clamp(24px, 5vw, 36px);
+      border-radius: 2px;
+      opacity: 0.35;
+    }
+
+    .check-circle {
+      width: clamp(56px, 15vw, 72px);
+      height: clamp(56px, 15vw, 72px);
+      background: #dcfce7;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto clamp(16px, 4vw, 24px);
+      animation: pop 0.4s cubic-bezier(0.22,1,0.36,1) 0.3s both;
+    }
+
+    @keyframes pop {
+      from { transform: scale(0.5); opacity: 0; }
+      to   { transform: scale(1); opacity: 1; }
+    }
+
+    .check-circle svg {
+      width: clamp(24px, 7vw, 32px);
+      height: clamp(24px, 7vw, 32px);
+    }
+
+    h2 {
+      font-size: clamp(18px, 5vw, 22px);
+      font-weight: 700;
+      color: var(--black);
+      letter-spacing: -0.3px;
+      margin-bottom: clamp(8px, 2vw, 10px);
+    }
+
+    p {
+      font-size: clamp(13px, 3.5vw, 15px);
+      color: var(--gray);
+      line-height: 1.6;
+      margin-bottom: clamp(24px, 6vw, 36px);
+    }
+
+    .btn {
+      display: block;
+      width: 100%;
+      padding: clamp(13px, 3.8vw, 15px);
+      background: var(--pink);
+      color: #fff;
+      text-decoration: none;
+      border-radius: var(--radius);
+      font-size: clamp(14px, 4vw, 15px);
+      font-weight: 600;
+      font-family: 'DM Sans', sans-serif;
+      letter-spacing: 0.2px;
+      transition: background 0.18s, transform 0.1s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .btn:hover { background: var(--pink-dark); }
+    .btn:active { transform: scale(0.985); }
+
+    .note {
+      margin-top: clamp(14px, 3.5vw, 18px);
+      font-size: clamp(11px, 3vw, 12px);
+      color: #bbb;
+    }
+
+    @media (min-width: 540px) {
+      body { background: #ededf2; }
+    }
+  </style>
 </head>
 <body>
-<script>
-  const hash = window.location.hash.substring(1);
-  const query = window.location.search.substring(1);
-  const params = new URLSearchParams(hash || query);
-  const type = params.get('type');
-  if (type === 'signup' || type === 'email_change') {
-    document.title = 'Email Confirmed!';
-  }
-</script>
-<style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: -apple-system, sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; background: #fafafa; padding: 24px; }
-  .card { background: #fff; border: 1px solid #e5e7eb; border-radius: 24px; padding: 48px 32px; max-width: 400px; width: 100%; text-align: center; box-shadow: 0 4px 40px rgba(232,67,147,0.08); }
-  h1 { font-size: 36px; color: #E84393; font-family: Georgia, serif; margin-bottom: 4px; }
-  .tagline { font-size: 10px; color: #bbb; letter-spacing: 4px; text-transform: uppercase; margin-bottom: 32px; }
-  .check { width: 64px; height: 64px; background: #dcfce7; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; }
-  h2 { font-size: 20px; font-weight: 700; color: #111; margin-bottom: 8px; }
-  p { font-size: 14px; color: #6b7280; line-height: 1.6; margin-bottom: 28px; }
-  .btn { display: block; background: #E84393; color: #fff; text-decoration: none; padding: 14px; border-radius: 12px; font-size: 15px; font-weight: 600; }
-</style>
 <div class="card">
-  <h1>Crushr</h1>
-  <p class="tagline">Find your crush</p>
-  <div class="check">
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+  <div class="brand-name">Crushr</div>
+  <div class="brand-tagline">Find your crush</div>
+  <div class="brand-line"></div>
+
+  <div class="check-circle">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
       <polyline points="20 6 9 17 4 12"/>
     </svg>
   </div>
+
   <h2>Email Confirmed!</h2>
   <p>Your account is ready. Open the Crushr app and log in to start finding your crush.</p>
+
   <a href="com.datingapp.crushr://crushr.in" class="btn">Open Crushr App</a>
+  <p class="note">If the app doesn't open, make sure Crushr is installed on your device.</p>
 </div>
 </body>
 </html>
