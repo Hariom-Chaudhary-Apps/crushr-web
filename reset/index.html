@@ -4,35 +4,86 @@
   <title>Reset Password — Crushr</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
-    body { font-family: sans-serif; text-align: center; padding: 60px 24px; background: #fff; }
-    h1 { color: #E84393; font-size: 28px; margin-bottom: 8px; }
-    p { color: #999; font-size: 14px; margin-bottom: 32px; }
-    a.btn {
-      display: inline-block;
-      background: #E84393;
-      color: white;
-      text-decoration: none;
-      padding: 16px 32px;
-      border-radius: 12px;
-      font-size: 16px;
-      font-weight: 600;
-    }
-    .error { color: #f00; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, sans-serif; background: #fff; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 24px; }
+    .card { width: 100%; max-width: 400px; text-align: center; }
+    h1 { color: #E84393; font-size: 32px; font-weight: 700; margin-bottom: 4px; }
+    .tagline { color: #ccc; font-size: 11px; letter-spacing: 3px; margin-bottom: 32px; }
+    h2 { font-size: 22px; font-weight: 700; margin-bottom: 8px; color: #111; }
+    p { color: #999; font-size: 14px; margin-bottom: 24px; }
+    input { width: 100%; padding: 14px 16px; border: 1.5px solid #eee; border-radius: 12px; font-size: 15px; margin-bottom: 12px; outline: none; }
+    input:focus { border-color: #E84393; }
+    button { width: 100%; padding: 14px; background: #E84393; color: white; border: none; border-radius: 12px; font-size: 15px; font-weight: 600; cursor: pointer; }
+    button:disabled { background: #f0a0c8; cursor: not-allowed; }
+    .msg { margin-top: 16px; font-size: 14px; }
+    .success { color: green; }
+    .error { color: red; }
   </style>
 </head>
 <body>
+<div class="card">
+  <h1>Crushr</h1>
+  <p class="tagline">FIND YOUR CRUSH</p>
+  <h2>Reset your password</h2>
+  <p>Enter your new password below.</p>
+  <input type="password" id="password" placeholder="New password" />
+  <input type="password" id="confirm" placeholder="Confirm new password" />
+  <button id="btn" onclick="resetPassword()">Update Password</button>
+  <div class="msg" id="msg"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+  const SUPABASE_URL = 'https://niyxpvmvedwbytmzjwjf.supabase.co';
+  const SUPABASE_ANON_KEY = 'YOUR_ANON_KEY_HERE';
+
+  const { createClient } = supabase;
+  const client = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  // Exchange the token from the URL hash
   const hash = window.location.hash;
-  if (!hash) {
-    document.write('<p class="error">Invalid or expired link. Please request a new one in the Crushr app.</p>');
+  if (hash) {
+    const params = new URLSearchParams(hash.substring(1));
+    const access_token = params.get('access_token');
+    const refresh_token = params.get('refresh_token');
+    if (access_token) {
+      client.auth.setSession({ access_token, refresh_token });
+    }
   }
-</script>
-<h1>Crushr</h1>
-<p>Tap the button below to reset your password in the app.</p>
-<a id="openBtn" class="btn">Open Crushr App</a>
-<script>
-  const hash = window.location.hash;
-  document.getElementById('openBtn').href = 'com.datingapp.crushr://crushr.in/updatePasswordScreen' + hash;
+
+  async function resetPassword() {
+    const password = document.getElementById('password').value;
+    const confirm = document.getElementById('confirm').value;
+    const msg = document.getElementById('msg');
+    const btn = document.getElementById('btn');
+
+    if (password.length < 6) {
+      msg.className = 'msg error';
+      msg.textContent = 'Password must be at least 6 characters.';
+      return;
+    }
+    if (password !== confirm) {
+      msg.className = 'msg error';
+      msg.textContent = 'Passwords do not match.';
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Updating...';
+
+    const { error } = await client.auth.updateUser({ password });
+
+    if (error) {
+      msg.className = 'msg error';
+      msg.textContent = 'Error: ' + error.message;
+      btn.disabled = false;
+      btn.textContent = 'Update Password';
+    } else {
+      msg.className = 'msg success';
+      msg.textContent = '✅ Password updated! Open the Crushr app and log in.';
+      btn.textContent = 'Done!';
+    }
+  }
 </script>
 </body>
 </html>
