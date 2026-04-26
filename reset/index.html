@@ -34,22 +34,27 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-  const SUPABASE_URL = 'https://niyxpvmvedwbytmzjwjf.supabase.co';
-  const SUPABASE_ANON_KEY = 'YOUR_ANON_KEY_HERE';
-
   const { createClient } = supabase;
-  const client = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const client = createClient(
+    'https://niyxpvmvedwbytmzjwjf.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5peXhwdm12ZWR3Ynl0bXpqd2pmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjQ3OTUsImV4cCI6MjA4OTQwMDc5NX0.IpxVPMRRJBGQi850oqzXQK2mcV-G3_KLmEw3S3lY86Y'
+  );
 
-  // Exchange the token from the URL hash
-  const hash = window.location.hash;
-  if (hash) {
-    const params = new URLSearchParams(hash.substring(1));
+  async function initSession() {
+    const hash = window.location.hash.substring(1);
+    const query = window.location.search.substring(1);
+    const params = new URLSearchParams(hash || query);
     const access_token = params.get('access_token');
     const refresh_token = params.get('refresh_token');
+    const code = params.get('code');
     if (access_token) {
-      client.auth.setSession({ access_token, refresh_token });
+      await client.auth.setSession({ access_token, refresh_token });
+    } else if (code) {
+      await client.auth.exchangeCodeForSession(code);
     }
   }
+
+  initSession();
 
   async function resetPassword() {
     const password = document.getElementById('password').value;
@@ -80,7 +85,7 @@
       btn.textContent = 'Update Password';
     } else {
       msg.className = 'msg success';
-      msg.textContent = '✅ Password updated! Open the Crushr app and log in.';
+      msg.textContent = 'Password updated! Open the Crushr app and Log In.';
       btn.textContent = 'Done!';
     }
   }
