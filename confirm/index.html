@@ -108,6 +108,31 @@
       height: clamp(24px, 7vw, 32px);
     }
 
+    /* Loading state */
+    .loading-circle {
+      width: clamp(56px, 15vw, 72px);
+      height: clamp(56px, 15vw, 72px);
+      background: #fce8f3;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto clamp(16px, 4vw, 24px);
+    }
+
+    .spinner {
+      width: 28px;
+      height: 28px;
+      border: 3px solid rgba(232,67,147,0.2);
+      border-top-color: var(--pink);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
     h2 {
       font-size: clamp(18px, 5vw, 22px);
       font-weight: 700;
@@ -137,6 +162,8 @@
       letter-spacing: 0.2px;
       transition: background 0.18s, transform 0.1s;
       -webkit-tap-highlight-color: transparent;
+      border: none;
+      cursor: pointer;
     }
 
     .btn:hover { background: var(--pink-dark); }
@@ -146,6 +173,23 @@
       margin-top: clamp(14px, 3.5vw, 18px);
       font-size: clamp(11px, 3vw, 12px);
       color: #bbb;
+      margin-bottom: 0;
+    }
+
+    .error-circle {
+      width: clamp(56px, 15vw, 72px);
+      height: clamp(56px, 15vw, 72px);
+      background: #fee2e2;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto clamp(16px, 4vw, 24px);
+    }
+
+    .error-circle svg {
+      width: clamp(24px, 7vw, 32px);
+      height: clamp(24px, 7vw, 32px);
     }
 
     @media (min-width: 540px) {
@@ -159,17 +203,90 @@
   <div class="brand-tagline">Find your crush</div>
   <div class="brand-line"></div>
 
-  <div class="check-circle">
-    <svg viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-      <polyline points="20 6 9 17 4 12"/>
-    </svg>
+  <!-- Loading state -->
+  <div id="loadingState">
+    <div class="loading-circle">
+      <div class="spinner"></div>
+    </div>
+    <h2>Confirming your email...</h2>
+    <p>Please wait a moment.</p>
   </div>
 
-  <h2>Email Confirmed!</h2>
-  <p>Your account is ready. Open the Crushr app and log in to start finding your crush.</p>
+  <!-- Success state -->
+  <div id="successState" style="display:none">
+    <div class="check-circle">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="20 6 9 17 4 12"/>
+      </svg>
+    </div>
+    <h2>Email Confirmed!</h2>
+    <p>Your account is ready. Open the Crushr app and log in to start finding your crush.</p>
+    <a href="com.datingapp.crushr://crushr.in" class="btn">Open Crushr App</a>
+    <p class="note">If the app doesn't open, make sure Crushr is installed on your device.</p>
+  </div>
 
-  <a href="com.datingapp.crushr://crushr.in" class="btn">Open Crushr App</a>
-  <p class="note">If the app doesn't open, make sure Crushr is installed on your device.</p>
+  <!-- Error state -->
+  <div id="errorState" style="display:none">
+    <div class="error-circle">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="8" x2="12" y2="12"/>
+        <line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+    </div>
+    <h2>Link Expired</h2>
+    <p>This confirmation link has expired or already been used. Please sign up again or request a new confirmation email.</p>
+  </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const { createClient } = supabase;
+  const client = createClient(
+    'https://niyxpvmvedwbytmzjwjf.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5peXhwdm12ZWR3Ynl0bXpqd2pmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjQ3OTUsImV4cCI6MjA4OTQwMDc5NX0.IpxVPMRRJBGQi850oqzXQK2mcV-G3_KLmEw3S3lY86Y'
+  );
+
+  function show(id) {
+    document.getElementById('loadingState').style.display = 'none';
+    document.getElementById('successState').style.display = 'none';
+    document.getElementById('errorState').style.display = 'none';
+    document.getElementById(id).style.display = 'block';
+  }
+
+  async function init() {
+    try {
+      const hash = window.location.hash.substring(1);
+      const query = window.location.search.substring(1);
+      const params = new URLSearchParams(hash || query);
+
+      const access_token = params.get('access_token');
+      const refresh_token = params.get('refresh_token');
+      const code = params.get('code');
+      const error = params.get('error');
+
+      if (error) {
+        show('errorState');
+        return;
+      }
+
+      if (access_token) {
+        const { error: sessionError } = await client.auth.setSession({ access_token, refresh_token });
+        if (sessionError) { show('errorState'); return; }
+        show('successState');
+      } else if (code) {
+        const { error: codeError } = await client.auth.exchangeCodeForSession(code);
+        if (codeError) { show('errorState'); return; }
+        show('successState');
+      } else {
+        show('errorState');
+      }
+    } catch (e) {
+      show('errorState');
+    }
+  }
+
+  init();
+</script>
 </body>
 </html>
